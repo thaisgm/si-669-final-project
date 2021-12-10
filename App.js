@@ -1,21 +1,49 @@
-import { StatusBar } from 'expo-status-bar';
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import HomeScreen from './HomePage.js';
+import LandingScreen from './LandingPage.js';
+import CreateAccountScreen from './CreateAccountPage.js';
+import ProfileScreen from './ProfilePage.js';
+import SearchScreen from './SearchPage.js';
+import TryScreen from './TryPage.js';
+import BeerScreen from './BeerPage.js';
+import ReviewsScreen from './ReviewsPage.js';
 
-export default function App() {
+
+import { firebaseConfig } from './Secrets';
+import { initializeApp } from 'firebase/app';
+import { initializeFirestore, collection,
+  doc, getDoc, setDoc, addDoc, deleteDoc
+} from "firebase/firestore";
+
+
+const app = initializeApp(firebaseConfig);
+const db = initializeFirestore(app, {
+  useFetchStreams: false
+});
+
+const Stack = createNativeStackNavigator();
+
+function App() {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="Landing">
+        <Stack.Screen name="Landing" component={LandingScreen}  />
+        <Stack.Screen name="Write Review" component={HomeScreen} />
+        <Stack.Screen name="CreateAccount" component={CreateAccountScreen} />
+        <Stack.Screen name="Profile" component={ProfileScreen} />
+        <Stack.Screen name="Search" component={SearchScreen} />
+        <Stack.Screen name="Saved List" component={TryScreen} />
+        <Stack.Screen name="Beer" component={BeerScreen} />
+        <Stack.Screen name="Read Reviews" component={ReviewsScreen} />
+
+
+
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+export default App;
+
