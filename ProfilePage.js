@@ -5,15 +5,14 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import { firebaseConfig } from './Secrets';
 import { initializeApp } from 'firebase/app';
 import { initializeFirestore, collection,
-    doc, getDoc, setDoc, addDoc, deleteDoc, getDocs, query, where, onSnapshot, updateDoc
+    doc, getDoc, query, where, onSnapshot, deleteDoc
   } from "firebase/firestore";
-import { SafeAreaView } from 'react-navigation';
-    
-const app = initializeApp(firebaseConfig);
-const db = initializeFirestore(app, {
-  useFetchStreams: false
-});
-
+  
+  const app = initializeApp(firebaseConfig);
+  const db = initializeFirestore(app, {
+    useFetchStreams: false
+  });
+  
 function ProfileScreen({navigation, route}){
     const { username, id } = route.params;
     const [userArr, getUserArr] = useState([]);
@@ -42,7 +41,9 @@ function ProfileScreen({navigation, route}){
                 let rating = review['rating'];
                 let drink_again = review['drink_again'];
                 let flavor_notes = review['flavor_notes']
-                let temp_arr = [beer_name, review_text, rating, drink_again, flavor_notes]
+                let beer_id = review['beer_id']
+
+                let temp_arr = [beer_name, review_text, rating, drink_again, flavor_notes, beer_id]
 
                 review_array.push(temp_arr);
                 
@@ -50,6 +51,61 @@ function ProfileScreen({navigation, route}){
             getReviewArr(review_array);
         });
 
+    }
+
+    async function deleteReview(id) {
+        const docRef = doc(db, "reviews", id);
+        await deleteDoc(docRef); 
+
+
+    }
+    
+    function deleteBeerFromDB() {
+        // const docRef = await getDoc(doc(db, 'users', user_id));
+
+        let q = query(collection(db, 'reviews'), where('username', '==', username), where('beer_name', '==', reviewArr[0][0]));
+        let doc_id = ''
+        onSnapshot(q, (qSnap) => {
+            if (qSnap.empty) {
+                console.log('Review does not exist.');
+            }
+            qSnap.docs.forEach((docSnap)=>{
+
+                deleteReview(docSnap.id)
+                alert('Revew Deleted')
+
+                
+                // let user = docSnap.data();
+                // if (user.password == password){
+                //     onChangeUsername('')
+                //     onChangePassword('')
+                //     navigation.navigate('Search', {username: username, password: password, id: })
+                // } else {
+                //     alert('Password is incorrect.')
+                //     onChangeUsername('')
+                //     onChangePassword('')    
+                // }
+            });
+            // doc.deleteDoc();
+        });
+
+        // console.log('HELLO', doc_id)
+
+        // const docRef = await getDoc(doc(db, 'reviews', doc_id));
+
+
+
+        // onSnapshot(q, (qSnap) => {
+        //     if (qSnap.empty) {
+        //         alert('Trouble deleting review.')
+        //     }
+        //     qSnap.docs.forEach((docSnap)=>{
+        //         beer_to_delete = docSnap;
+        //         console.log(beer_to_delete)
+
+        //     });
+        // });
+        // let updated = await deleteDoc(beer_to_delete);
 
 
     }
@@ -71,6 +127,15 @@ function ProfileScreen({navigation, route}){
                     <Text style={{fontSize: 18, color: '#011f4f', fontWeight: '200'}}>Would drink again? <Text style={{color: 'white', fontWeight: '400'}}>{item[3] ? 'True' : 'False'}</Text></Text>
                     <Text style={{fontSize: 18, color: '#011f4f', fontWeight: '200'}}>Flavor Notes: {item[4]}</Text>
                     <Text style={{fontSize: 18, color: '#ebde34'}}>Rating: {item[2]}</Text>
+                    <Icon.Button 
+                            name="remove" 
+                            color="red" 
+                            size={30} 
+                            backgroundColor= '#a3afc2' 
+                            style={{margin: '1%', justifyContent: 'flex-end'}}
+                            onPress={() => deleteBeerFromDB(item[5])}
+                        >
+                    </Icon.Button>
                 </View>  
                 )
             )}
